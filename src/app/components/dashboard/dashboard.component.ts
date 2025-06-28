@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HrDataService } from '../../services/hr-data.service';
 import { HiringMetrics, JobDescription } from '../../models/hr-data.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -1361,10 +1362,11 @@ import { HiringMetrics, JobDescription } from '../../models/hr-data.interface';
     }
   `]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   metrics: HiringMetrics | null = null;
   recentJobs: JobDescription[] = [];
   isLoading = true;
+  private subscription: Subscription | null = null;
 
   constructor(private hrDataService: HrDataService) {}
 
@@ -1372,20 +1374,61 @@ export class DashboardComponent implements OnInit {
     this.loadDashboardData();
   }
 
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
+  }
+
   private loadDashboardData() {
     this.isLoading = true;
     
-    this.hrDataService.getHiringMetrics().subscribe(metrics => {
-      this.metrics = metrics;
-      this.isLoading = false;
+    // Unsubscribe from previous subscriptions
+    this.subscription?.unsubscribe();
+    
+    // Create a combined subscription for both metrics and jobs
+    const metricsSub = this.hrDataService.getHiringMetrics().subscribe({
+      next: (metrics) => {
+        console.log('Metrics updated:', metrics);
+        this.metrics = metrics;
+        this.checkLoadingComplete();
+      },
+      error: (err) => {
+        console.error('Failed to load hiring metrics', err);
+        this.checkLoadingComplete();
+      }
     });
 
-    this.hrDataService.getJobDescriptions().subscribe(jobs => {
-      // Sort by creation date and take the 10 most recent
-      this.recentJobs = jobs
-        .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime())
-        .slice(0, 10);
+    const jobsSub = this.hrDataService.getJobDescriptions().subscribe({
+      next: (jobs) => {
+        console.log('Jobs data updated:', jobs);
+        if (Array.isArray(jobs)) {
+          this.recentJobs = jobs
+            .filter(job => !!job?.createdDate)
+            .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime())
+            .slice(0, 10);
+        } else {
+          this.recentJobs = [];
+          console.warn('Jobs data was not an array:', jobs);
+        }
+        this.checkLoadingComplete();
+      },
+      error: (err) => {
+        console.error('Failed to load job descriptions', err);
+        this.recentJobs = [];
+        this.checkLoadingComplete();
+      }
     });
+
+    // Combine subscriptions
+    this.subscription = new Subscription();
+    this.subscription.add(metricsSub);
+    this.subscription.add(jobsSub);
+  }
+
+  private checkLoadingComplete() {
+    // Only set loading to false if we have both metrics and jobs data
+    if (this.metrics !== null && this.recentJobs.length > 0) {
+      this.isLoading = false;
+    }
   }
 
   getOpenPositionRate(): number {
