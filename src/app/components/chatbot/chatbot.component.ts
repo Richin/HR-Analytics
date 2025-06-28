@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked }
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../services/chat.service';
-import { ChatMessage } from '../../models/chat.interface';
+import { AIAnalysisService } from '../../services/ai-analysis.service';
+import { ChatMessage, MessageAnalysis, AIInsight } from '../../models/chat.interface';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -10,335 +11,494 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <!-- Chat Toggle Button -->
-    <div class="chat-toggle" (click)="toggleChat()" *ngIf="!isOpen">
-      <div class="chat-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-      </div>
-      <div class="notification-dot" *ngIf="hasUnreadMessages"></div>
-    </div>
-
-    <!-- Chat Window -->
-    <div class="chat-window" [class.open]="isOpen" *ngIf="isOpen">
-      <!-- Chat Header -->
-      <div class="chat-header">
-        <div class="chat-title">
-          <div class="bot-avatar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-              <line x1="9" y1="9" x2="9.01" y2="9"/>
-              <line x1="15" y1="9" x2="15.01" y2="9"/>
-            </svg>
-          </div>
-          <div class="title-text">
-            <h3>HR Analytics Assistant</h3>
-            <span class="status" [class.online]="true">Online</span>
-          </div>
+    <div class="chatbot-container">
+      <!-- AI Analysis Panel -->
+      <div class="ai-analysis-panel" *ngIf="showAnalysis">
+        <div class="analysis-header">
+          <h4>🤖 AI Analysis</h4>
+          <button class="close-btn" (click)="toggleAnalysis()">×</button>
         </div>
-        <div class="chat-actions">
-          <button class="action-btn" (click)="clearChat()" title="Clear Chat">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 6h18"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </button>
-          <button class="action-btn" (click)="toggleChat()" title="Close Chat">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Chat Messages -->
-      <div class="chat-messages" #messagesContainer>
-        <div class="message" 
-             *ngFor="let message of messages" 
-             [class.user-message]="message.sender === 'user'"
-             [class.bot-message]="message.sender === 'bot'">
+        
+        <!-- Message Analysis -->
+        <div class="analysis-section" *ngIf="currentAnalysis">
+          <h5>Message Analysis</h5>
+          <div class="analysis-grid">
+            <div class="analysis-item">
+              <span class="label">Sentiment:</span>
+              <span class="value sentiment-{{ currentAnalysis.sentiment }}">
+                {{ currentAnalysis.sentiment | titlecase }}
+              </span>
+            </div>
+            <div class="analysis-item">
+              <span class="label">Intent:</span>
+              <span class="value">{{ currentAnalysis.intent | titlecase }}</span>
+            </div>
+            <div class="analysis-item">
+              <span class="label">Confidence:</span>
+              <span class="value">{{ (currentAnalysis.confidence * 100) | number:'1.0-0' }}%</span>
+            </div>
+            <div class="analysis-item">
+              <span class="label">HR Relevance:</span>
+              <span class="value">{{ (currentAnalysis.hrRelevance * 100) | number:'1.0-0' }}%</span>
+            </div>
+          </div>
           
-          <div class="message-content">
-            <div class="message-avatar" *ngIf="message.sender === 'bot'">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                <line x1="9" y1="9" x2="9.01" y2="9"/>
-                <line x1="15" y1="9" x2="15.01" y2="9"/>
-              </svg>
+          <!-- Keywords -->
+          <div class="keywords-section" *ngIf="currentAnalysis.keywords.length > 0">
+            <h6>Keywords:</h6>
+            <div class="keywords-list">
+              <span class="keyword" *ngFor="let keyword of currentAnalysis.keywords">
+                {{ keyword }}
+              </span>
             </div>
-            
-            <div class="message-bubble">
-              <div class="message-text" *ngIf="!message.isLoading">
-                {{ message.text }}
+          </div>
+
+          <!-- Entities -->
+          <div class="entities-section" *ngIf="currentAnalysis.entities.length > 0">
+            <h6>Entities:</h6>
+            <div class="entities-list">
+              <div class="entity" *ngFor="let entity of currentAnalysis.entities">
+                <span class="entity-name">{{ entity.name }}</span>
+                <span class="entity-type">{{ entity.type }}</span>
+                <span class="entity-value">{{ entity.value }}</span>
               </div>
-              <div class="loading-dots" *ngIf="message.isLoading">
-                <span></span>
-                <span></span>
-                <span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="insights-section" *ngIf="insights.length > 0">
+          <h5>💡 AI Insights</h5>
+          <div class="insights-list">
+            <div class="insight-item" *ngFor="let insight of insights.slice(0, 2)">
+              <div class="insight-header">
+                <span class="insight-type">{{ insight.type | titlecase }}</span>
+                <span class="insight-confidence">{{ (insight.confidence * 100) | number:'1.0-0' }}%</span>
               </div>
-              <div class="message-time">
-                {{ message.timestamp | date:'shortTime' }}
-              </div>
+              <div class="insight-title">{{ insight.title }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Chat Input -->
-      <div class="chat-input">
-        <div class="input-container">
-          <input 
-            type="text" 
-            [(ngModel)]="currentMessage" 
-            (keyup.enter)="sendMessage()"
-            placeholder="Type your message..."
-            [disabled]="isLoading"
-            class="message-input"
-            #messageInput>
-          <button 
-            class="send-btn" 
-            (click)="sendMessage()" 
-            [disabled]="!currentMessage.trim() || isLoading">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22,2 15,22 11,13 2,9"/>
-            </svg>
-          </button>
+      <!-- Chat Interface -->
+      <div class="chat-interface">
+        <div class="chat-header">
+          <div class="header-content">
+            <div class="bot-avatar">🤖</div>
+            <div class="header-info">
+              <h3>HR Analytics Assistant</h3>
+              <span class="status" [class.online]="isOnline">● {{ isOnline ? 'Online' : 'Offline' }}</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="analysis-toggle" (click)="toggleAnalysis()" [class.active]="showAnalysis">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/>
+                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+              </svg>
+            </button>
+            <button class="clear-btn" (click)="clearChat()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-messages" #messageContainer>
+          <div class="message" 
+               *ngFor="let message of messages" 
+               [class.user-message]="message.sender === 'user'"
+               [class.bot-message]="message.sender === 'bot'">
+            
+            <div class="message-content">
+              <div class="message-avatar" *ngIf="message.sender === 'bot'">🤖</div>
+              <div class="message-bubble">
+                <div class="message-text">{{ message.text }}</div>
+                <div class="message-time">{{ message.timestamp | date:'shortTime' }}</div>
+                
+                <!-- Message Analysis Badge -->
+                <div class="analysis-badge" *ngIf="message.analysis && message.sender === 'user'">
+                  <span class="sentiment-{{ message.analysis.sentiment }}">
+                    {{ message.analysis.sentiment | titlecase }}
+                  </span>
+                  <span class="confidence">{{ (message.analysis.confidence * 100) | number:'1.0-0' }}%</span>
+                </div>
+              </div>
+              <div class="message-avatar" *ngIf="message.sender === 'user'">👤</div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div class="loading-indicator" *ngIf="message.isLoading">
+              <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <div class="input-container">
+            <input 
+              type="text" 
+              [(ngModel)]="userInput" 
+              (keyup.enter)="sendMessage()"
+              placeholder="Ask about jobs, candidates, metrics..."
+              [disabled]="isLoading"
+              class="message-input"
+            >
+            <button 
+              (click)="sendMessage()" 
+              [disabled]="!userInput.trim() || isLoading"
+              class="send-btn"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13"/>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="quick-actions" *ngIf="!isLoading">
+            <button class="quick-btn" (click)="sendQuickMessage('Show me job openings')">
+              💼 Jobs
+            </button>
+            <button class="quick-btn" (click)="sendQuickMessage('How many candidates do we have?')">
+              👥 Candidates
+            </button>
+            <button class="quick-btn" (click)="sendQuickMessage('What are our key metrics?')">
+              📊 Metrics
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    /* Chat Toggle Button */
-    .chat-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 50%;
+    .chatbot-container {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-
-    .chat-toggle:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    .chat-icon {
-      color: white;
-    }
-
-    .notification-dot {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      width: 12px;
-      height: 12px;
-      background: #ff4757;
-      border-radius: 50%;
-      border: 2px solid white;
-    }
-
-    /* Chat Window */
-    .chat-window {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 380px;
-      height: 500px;
+      height: 600px;
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .ai-analysis-panel {
+      width: 300px;
+      background: #f8f9fa;
+      border-right: 1px solid #e0e0e0;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .analysis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .analysis-header h4 {
+      margin: 0;
+      color: #333;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .analysis-section, .insights-section {
+      margin-bottom: 20px;
+    }
+
+    .analysis-section h5, .insights-section h5 {
+      margin: 0 0 15px 0;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .analysis-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .analysis-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .analysis-item .label {
+      color: #666;
+    }
+
+    .analysis-item .value {
+      font-weight: 600;
+    }
+
+    .sentiment-positive { color: #2ed573; }
+    .sentiment-negative { color: #ff4757; }
+    .sentiment-neutral { color: #747d8c; }
+
+    .keywords-section, .entities-section {
+      margin-top: 15px;
+    }
+
+    .keywords-section h6, .entities-section h6 {
+      margin: 0 0 8px 0;
+      color: #555;
+      font-size: 12px;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .keyword {
+      background: #667eea;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .entities-list {
       display: flex;
       flex-direction: column;
-      z-index: 1001;
-      transform: translateY(100px) scale(0.8);
-      opacity: 0;
-      transition: all 0.3s ease;
+      gap: 6px;
     }
 
-    .chat-window.open {
-      transform: translateY(0) scale(1);
-      opacity: 1;
+    .entity {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: white;
+      border-radius: 6px;
+      font-size: 11px;
     }
 
-    /* Chat Header */
+    .entity-name { font-weight: 600; color: #333; }
+    .entity-type { color: #667eea; font-size: 10px; }
+    .entity-value { color: #666; }
+
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .insight-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+
+    .insight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .insight-type {
+      font-size: 11px;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .insight-confidence {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .insight-title {
+      font-size: 12px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .chat-interface {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     .chat-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px 16px 0 0;
-      color: white;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #f8f9fa;
     }
 
-    .chat-title {
+    .header-content {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
     .bot-avatar {
-      width: 32px;
-      height: 32px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 24px;
     }
 
-    .title-text h3 {
+    .header-info h3 {
       margin: 0;
+      color: #333;
       font-size: 16px;
-      font-weight: 600;
     }
 
     .status {
       font-size: 12px;
-      opacity: 0.8;
+      color: #666;
     }
 
-    .status.online::before {
-      content: '';
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background: #2ed573;
-      border-radius: 50%;
-      margin-right: 6px;
+    .status.online {
+      color: #2ed573;
     }
 
-    .chat-actions {
+    .header-actions {
       display: flex;
       gap: 8px;
     }
 
-    .action-btn {
+    .analysis-toggle, .clear-btn {
       background: none;
       border: none;
-      color: white;
+      padding: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-      transition: background 0.2s ease;
+      color: #666;
+      transition: all 0.2s ease;
     }
 
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+    .analysis-toggle:hover, .clear-btn:hover {
+      background: #e9ecef;
+      color: #333;
     }
 
-    /* Chat Messages */
+    .analysis-toggle.active {
+      background: #667eea;
+      color: white;
+    }
+
     .chat-messages {
       flex: 1;
-      padding: 16px;
+      padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
     .message {
       display: flex;
-      align-items: flex-end;
-    }
-
-    .user-message {
-      justify-content: flex-end;
-    }
-
-    .bot-message {
-      justify-content: flex-start;
+      flex-direction: column;
     }
 
     .message-content {
       display: flex;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 8px;
-      max-width: 80%;
     }
 
     .message-avatar {
-      width: 24px;
-      height: 24px;
-      background: #f1f3f4;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      font-size: 20px;
+      margin-top: 2px;
     }
 
     .message-bubble {
       background: #f1f3f4;
       padding: 12px 16px;
       border-radius: 18px;
+      max-width: 70%;
       position: relative;
     }
 
     .user-message .message-bubble {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       color: white;
     }
 
     .message-text {
+      margin-bottom: 4px;
       line-height: 1.4;
-      word-wrap: break-word;
     }
 
     .message-time {
       font-size: 11px;
-      opacity: 0.6;
-      margin-top: 4px;
+      opacity: 0.7;
     }
 
-    /* Loading Animation */
-    .loading-dots {
+    .analysis-badge {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 10px;
+    }
+
+    .analysis-badge span {
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .loading-indicator {
+      margin-top: 8px;
+      margin-left: 28px;
+    }
+
+    .typing-dots {
       display: flex;
       gap: 4px;
-      padding: 8px 0;
     }
 
-    .loading-dots span {
+    .typing-dots span {
       width: 6px;
       height: 6px;
-      background: #999;
+      background: #667eea;
       border-radius: 50%;
-      animation: loading 1.4s infinite ease-in-out;
+      animation: typing 1.4s infinite ease-in-out;
     }
 
-    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
 
-    @keyframes loading {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    /* Chat Input */
     .chat-input {
-      padding: 16px;
+      padding: 20px;
       border-top: 1px solid #e0e0e0;
     }
 
     .input-container {
       display: flex;
       gap: 8px;
-      align-items: center;
+      margin-bottom: 12px;
     }
 
     .message-input {
@@ -348,68 +508,65 @@ import { Subscription } from 'rxjs';
       border-radius: 24px;
       outline: none;
       font-size: 14px;
-      transition: border-color 0.2s ease;
     }
 
     .message-input:focus {
       border-color: #667eea;
     }
 
-    .message-input:disabled {
-      background: #f5f5f5;
-      cursor: not-allowed;
-    }
-
     .send-btn {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      border-radius: 50%;
+      background: #667eea;
       color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 50%;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease;
     }
 
     .send-btn:hover:not(:disabled) {
-      transform: scale(1.05);
+      background: #5a6fd8;
     }
 
     .send-btn:disabled {
-      opacity: 0.5;
+      background: #ccc;
       cursor: not-allowed;
     }
 
-    /* Responsive Design */
-    @media (max-width: 480px) {
-      .chat-window {
-        width: calc(100vw - 40px);
-        height: calc(100vh - 120px);
-        bottom: 10px;
-        right: 20px;
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      padding: 8px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .quick-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+      .chatbot-container {
+        flex-direction: column;
+        height: 500px;
       }
-    }
 
-    /* Scrollbar Styling */
-    .chat-messages::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .chat-messages::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 2px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 2px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a8;
+      .ai-analysis-panel {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+      }
     }
   `]
 })
@@ -418,36 +575,30 @@ export class ChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('messageInput') messageInput!: ElementRef;
 
   messages: ChatMessage[] = [];
-  isOpen = false;
-  currentMessage = '';
+  userInput = '';
   isLoading = false;
-  hasUnreadMessages = false;
+  isOnline = true;
+  showAnalysis = false;
+  currentAnalysis: MessageAnalysis | null = null;
+  insights: AIInsight[] = [];
+  
   private subscription = new Subscription();
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private aiAnalysisService: AIAnalysisService
+  ) {}
 
   ngOnInit() {
-    // Subscribe to messages
+    // Subscribe to AI insights
     this.subscription.add(
-      this.chatService.messages$.subscribe(messages => {
-        this.messages = messages;
-        this.scrollToBottom();
+      this.aiAnalysisService.analysis$.subscribe(insights => {
+        this.insights = insights;
       })
     );
 
-    // Subscribe to chat open state
-    this.subscription.add(
-      this.chatService.isOpen$.subscribe(isOpen => {
-        this.isOpen = isOpen;
-        if (isOpen) {
-          this.hasUnreadMessages = false;
-          // Focus input when chat opens
-          setTimeout(() => {
-            this.messageInput?.nativeElement?.focus();
-          }, 100);
-        }
-      })
-    );
+    // Add welcome message
+    this.addBotMessage('Hello! I\'m your HR Analytics Assistant. I can help you with job data, candidate information, metrics, and more. How can I assist you today?');
   }
 
   ngOnDestroy() {
@@ -458,33 +609,99 @@ export class ChatbotComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.scrollToBottom();
   }
 
-  sendMessage(): void {
-    const message = this.currentMessage.trim();
-    if (!message || this.isLoading) return;
+  async sendMessage(): Promise<void> {
+    if (!this.userInput.trim() || this.isLoading) return;
 
+    const userMessage = this.userInput.trim();
+    this.userInput = '';
+    
+    // Add user message
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      text: userMessage,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    this.messages.push(userMsg);
+
+    // Analyze user message
+    this.analyzeUserMessage(userMessage);
+
+    // Add loading message
+    const loadingMsg: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      text: '',
+      sender: 'bot',
+      timestamp: new Date(),
+      isLoading: true
+    };
+    this.messages.push(loadingMsg);
     this.isLoading = true;
-    this.currentMessage = '';
 
-    this.chatService.sendMessage(message).subscribe({
-      next: (response) => {
-        console.log('Chat response:', response);
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Chat error:', error);
-        // Add error message
-        this.chatService['addBotMessage']('Sorry, I encountered an error. Please try again.');
-        this.isLoading = false;
+    try {
+      // Get bot response
+      const response = await this.chatService.sendMessage(userMessage).toPromise();
+      
+      // Remove loading message and add bot response
+      this.messages.pop();
+      if (response) {
+        this.addBotMessage(response.message);
+        // Analyze bot response
+        this.analyzeBotResponse(response.message, userMessage);
+      } else {
+        this.addBotMessage('Sorry, I received an empty response. Please try again.');
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      this.messages.pop();
+      this.addBotMessage('Sorry, I encountered an error. Please try again.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  sendQuickMessage(message: string): void {
+    this.userInput = message;
+    this.sendMessage();
+  }
+
+  clearChat(): void {
+    this.messages = [];
+    this.addBotMessage('Chat cleared! How can I help you today?');
+  }
+
+  toggleAnalysis(): void {
+    this.showAnalysis = !this.showAnalysis;
+  }
+
+  private addBotMessage(text: string): void {
+    const message: ChatMessage = {
+      id: Date.now().toString(),
+      text,
+      sender: 'bot',
+      timestamp: new Date()
+    };
+    this.messages.push(message);
+  }
+
+  private analyzeUserMessage(message: string): void {
+    this.aiAnalysisService.analyzeMessage(message).subscribe(analysis => {
+      this.currentAnalysis = analysis;
+      
+      // Add analysis to the last user message
+      const lastUserMessage = this.messages.find(m => m.sender === 'user');
+      if (lastUserMessage) {
+        lastUserMessage.analysis = analysis;
       }
     });
   }
 
-  toggleChat(): void {
-    this.chatService.toggleChat();
-  }
-
-  clearChat(): void {
-    this.chatService.clearChat();
+  private analyzeBotResponse(response: string, userMessage: string): void {
+    this.aiAnalysisService.analyzeResponse(response, userMessage).subscribe(analysis => {
+      console.log('Bot response analysis:', analysis);
+      // You can use this analysis to improve future responses
+    });
   }
 
   private scrollToBottom(): void {
