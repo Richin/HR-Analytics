@@ -81,7 +81,7 @@ interface DemographicData {
             <div class="bottleneck-content">
               <h4>Reference Check</h4>
               <div class="bottleneck-description">Slow external verification</div>
-              <div class="bottleneck-time moderate-time">3.2 days average</div>
+              <div class="bottleneck-time moderate-time">14 days average</div>
             </div>
           </div>
         </div>
@@ -135,10 +135,10 @@ interface DemographicData {
       </div>
 
       <!-- Performance Chart -->
-      <div class="chart-container">
+      <!-- <div class="chart-container">
         <h3>📈 Hiring Velocity Trends</h3>
         <canvas #velocityChart width="400" height="200"></canvas>
-      </div>
+      </div> -->
 
       <!-- Demographics -->
       <div class="card">

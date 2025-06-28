@@ -210,7 +210,7 @@ import { Subscription } from 'rxjs';
             <div class="content-card">
               <div class="card-header">
                 <h3 class="card-title">Hiring Velocity</h3>
-                <div class="status-badge success">On Track</div>
+                <!-- <div class="status-badge success">On Track</div> -->
               </div>
               <div class="velocity-metrics">
                 <div class="velocity-item">

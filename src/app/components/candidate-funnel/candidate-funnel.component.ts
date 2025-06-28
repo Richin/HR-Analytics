@@ -246,7 +246,7 @@ import { HiringMetrics, StageMetrics } from '../../models/hr-data.interface';
         <div class="status-section">
           <div class="content-card status-card">
             <div class="card-header">
-              <h3 class="card-title">Current Status Summary</h3>
+              <h3 class="card-title">Current Offer Summary</h3>
               <div class="status-overview">
                 <span class="total-candidates">{{ getTotalStatusCount() }} Total Candidates</span>
               </div>
@@ -288,7 +288,7 @@ import { HiringMetrics, StageMetrics } from '../../models/hr-data.interface';
                 </div>
                 <div class="status-content">
                   <div class="status-value">{{ metrics?.currentStatus?.offersMade || 0 }}</div>
-                  <div class="status-label">Offers Made</div>
+                  <div class="status-label">Offers Accepted</div>
                   <div class="status-percentage">{{ getStatusPercentage('offersMade') }}%</div>
                 </div>
               </div>
