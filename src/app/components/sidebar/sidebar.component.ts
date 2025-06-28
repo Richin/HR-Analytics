@@ -87,6 +87,20 @@ import { RouterModule } from '@angular/router';
               </a>
             </li>
             <li class="nav-item">
+              <a href="https://joyful-panda-1f1f02.netlify.app/" 
+                 target="_blank"
+                 class="nav-link">
+                <div class="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <span class="nav-text">Interview Analyzer</span>
+              </a>
+            </li>
+            <li class="nav-item">
               <a routerLink="/ai-insights" 
                  routerLinkActive="active"
                  class="nav-link">
@@ -99,20 +113,7 @@ import { RouterModule } from '@angular/router';
                 <span class="nav-text">AI Insights</span>
               </a>
             </li>
-            <li class="nav-item">
-              <a routerLink="/ai-training" 
-                 routerLinkActive="active"
-                 class="nav-link">
-                <div class="nav-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                    <path d="M2 17l10 5 10-5"/>
-                    <path d="M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <span class="nav-text">AI Training</span>
-              </a>
-            </li>
+
           </ul>
         </div>
 
