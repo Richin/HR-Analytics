@@ -1,0 +1,94 @@
+[
+  {
+    "id": "candidate-1",
+    "name": "John Doe",
+    "email": "john.doe@email.com",
+    "jobId": "job-1",
+    "currentStage": "interviewed",
+    "stageHistory": [
+      {
+        "stage": "applied",
+        "date": "2024-06-15T10:30:00Z",
+        "daysInStage": 2,
+        "outcome": "passed"
+      },
+      {
+        "stage": "screened",
+        "date": "2024-06-17T14:15:00Z",
+        "daysInStage": 1,
+        "outcome": "passed"
+      },
+      {
+        "stage": "shortlisted",
+        "date": "2024-06-18T09:00:00Z",
+        "daysInStage": 3,
+        "outcome": "passed"
+      },
+      {
+        "stage": "interviewed",
+        "date": "2024-06-21T08:00:00Z",
+        "daysInStage": 2,
+        "outcome": "pending"
+      }
+    ],
+    "demographics": {
+      "age": 28,
+      "gender": "Male",
+      "location": "New York",
+      "experience": 5,
+      "education": "Master's"
+    }
+  },
+  {
+    "id": "candidate-2",
+    "name": "Jane Smith",
+    "email": "jane.smith@email.com",
+    "jobId": "job-2",
+    "currentStage": "offered",
+    "stageHistory": [
+      {
+        "stage": "applied",
+        "date": "2024-06-14T14:15:00Z",
+        "daysInStage": 1,
+        "outcome": "passed"
+      },
+      {
+        "stage": "screened",
+        "date": "2024-06-15T09:00:00Z",
+        "daysInStage": 2,
+        "outcome": "passed"
+      },
+      {
+        "stage": "shortlisted",
+        "date": "2024-06-17T08:00:00Z",
+        "daysInStage": 2,
+        "outcome": "passed"
+      },
+      {
+        "stage": "interviewed",
+        "date": "2024-06-19T11:45:00Z",
+        "daysInStage": 1,
+        "outcome": "passed"
+      },
+      {
+        "stage": "hr_round",
+        "date": "2024-06-20T10:30:00Z",
+        "daysInStage": 1,
+        "outcome": "passed"
+      },
+      {
+        "stage": "offered",
+        "date": "2024-06-21T14:15:00Z",
+        "daysInStage": 1,
+        "outcome": "pending"
+      }
+    ],
+    "demographics": {
+      "age": 32,
+      "gender": "Female",
+      "location": "San Francisco",
+      "experience": 8,
+      "education": "Bachelor's"
+    }
+  }
+] 

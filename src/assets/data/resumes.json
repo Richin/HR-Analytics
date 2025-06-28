@@ -1,0 +1,52 @@
+[
+  {
+    "id": "resume-1",
+    "candidateName": "John Doe",
+    "email": "john.doe@email.com",
+    "phone": "+1-555-1234",
+    "submittedDate": "2024-06-15T10:30:00Z",
+    "status": "processed",
+    "jobId": "job-1",
+    "source": "LinkedIn"
+  },
+  {
+    "id": "resume-2",
+    "candidateName": "Jane Smith",
+    "email": "jane.smith@email.com",
+    "phone": "+1-555-5678",
+    "submittedDate": "2024-06-14T14:15:00Z",
+    "status": "unprocessed",
+    "jobId": "job-2",
+    "source": "Indeed"
+  },
+  {
+    "id": "resume-3",
+    "candidateName": "Mike Johnson",
+    "email": "mike.johnson@email.com",
+    "phone": "+1-555-9012",
+    "submittedDate": "2024-06-13T09:00:00Z",
+    "status": "processed",
+    "jobId": "job-1",
+    "source": "Company Website"
+  },
+  {
+    "id": "resume-4",
+    "candidateName": "Sarah Wilson",
+    "email": "sarah.wilson@email.com",
+    "phone": "+1-555-3456",
+    "submittedDate": "2024-06-12T08:00:00Z",
+    "status": "duplicate",
+    "jobId": "job-3",
+    "source": "Referral"
+  },
+  {
+    "id": "resume-5",
+    "candidateName": "David Brown",
+    "email": "david.brown@email.com",
+    "phone": "+1-555-7890",
+    "submittedDate": "2024-06-11T11:45:00Z",
+    "status": "processed",
+    "jobId": "job-4",
+    "source": "Recruiter"
+  }
+] 

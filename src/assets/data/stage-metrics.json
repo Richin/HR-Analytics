@@ -1,0 +1,8 @@
+[
+  { "stage": "Applied", "count": 120, "dropoffRate": 0, "avgDays": 0 },
+  { "stage": "Screened", "count": 85, "dropoffRate": 29.2, "avgDays": 2.1 },
+  { "stage": "Shortlisted", "count": 45, "dropoffRate": 47.1, "avgDays": 1.8 },
+  { "stage": "Interviewed", "count": 28, "dropoffRate": 37.8, "avgDays": 4.1 },
+  { "stage": "HR Round", "count": 18, "dropoffRate": 35.7, "avgDays": 2.3 },
+  { "stage": "Offered", "count": 12, "dropoffRate": 33.3, "avgDays": 1.5 }
+] 

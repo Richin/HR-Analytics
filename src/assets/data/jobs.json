@@ -1,0 +1,57 @@
+[
+  {
+    "id": "job-1",
+    "title": "Software Engineer",
+    "department": "Engineering",
+    "status": "open",
+    "createdDate": "2024-05-15T10:30:00Z",
+    "daysOpen": 45,
+    "applicantsCount": 12,
+    "location": "New York",
+    "priority": "high"
+  },
+  {
+    "id": "job-2",
+    "title": "Product Manager",
+    "department": "Marketing",
+    "status": "closed",
+    "createdDate": "2024-04-20T14:15:00Z",
+    "daysOpen": 60,
+    "applicantsCount": 20,
+    "location": "San Francisco",
+    "priority": "medium"
+  },
+  {
+    "id": "job-3",
+    "title": "Sales Executive",
+    "department": "Sales",
+    "status": "open",
+    "createdDate": "2024-06-01T09:00:00Z",
+    "daysOpen": 28,
+    "applicantsCount": 8,
+    "location": "Austin",
+    "priority": "low"
+  },
+  {
+    "id": "job-4",
+    "title": "Data Analyst",
+    "department": "Finance",
+    "status": "open",
+    "createdDate": "2024-06-10T08:00:00Z",
+    "daysOpen": 18,
+    "applicantsCount": 15,
+    "location": "Remote",
+    "priority": "medium"
+  },
+  {
+    "id": "job-5",
+    "title": "Marketing Specialist",
+    "department": "Marketing",
+    "status": "closed",
+    "createdDate": "2024-03-30T11:45:00Z",
+    "daysOpen": 75,
+    "applicantsCount": 23,
+    "location": "Boston",
+    "priority": "high"
+  }
+] 

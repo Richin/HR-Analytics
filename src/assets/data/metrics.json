@@ -1,0 +1,32 @@
+{
+  "totalJobDescriptions": 5,
+  "openPositions": 3,
+  "closedPositions": 2,
+  "agingJobs": {
+    "thirtyPlus": 2,
+    "sixtyPlus": 1,
+    "ninetyPlus": 0
+  },
+  "attentionRequired": {
+    "noApplicants": 0,
+    "agingBeyondSixty": 1
+  },
+  "resumeMetrics": {
+    "totalResumes": 5,
+    "todayInflow": 2,
+    "unprocessed": 1,
+    "duplicates": 1
+  },
+  "hiringVelocity": {
+    "avgTimeToFill": 21.5,
+    "timeToFirstInterview": 5.2,
+    "timeToOffer": 14.1,
+    "timeToAcceptance": 3.8
+  },
+  "currentStatus": {
+    "rejected": 2,
+    "withdrawn": 1,
+    "offersMade": 1,
+    "inProcess": 2
+  }
+} 
