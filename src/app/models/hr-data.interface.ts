@@ -1,3 +1,15 @@
+export interface Job {
+  id: string;
+  title: string;
+  department: string;
+  status: string;
+  createdDate: Date;
+  daysOpen: number;
+  applicantsCount: number;
+  location: string;
+  priority: string;
+}
+
 export interface JobDescription {
   id: string;
   title: string;
